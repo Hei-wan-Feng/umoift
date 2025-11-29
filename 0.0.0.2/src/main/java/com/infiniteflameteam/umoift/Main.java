@@ -2,7 +2,7 @@ package com.infiniteflameteam.umoift;
 
 import com.infiniteflameteam.umoift.blocks.*;
 import com.infiniteflameteam.umoift.commands.DialogCommand;
-import com.infiniteflameteam.umoift.dialog.DialogManager;
+import com.infiniteflameteam.umoift.dialog.OfficialDialogManager;
 import com.infiniteflameteam.umoift.network.DialogNetworkHandler;
 import com.mojang.logging.LogUtils;
 import net.minecraft.world.item.BlockItem;
@@ -97,12 +97,16 @@ public class Main {
 
     public Main() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        // 注册方块和物品
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
-        modEventBus.register(this);
 
-        // 注册到Forge事件总线
-        MinecraftForge.EVENT_BUS.register(this);
+        // 注册 Mod 事件总线处理器
+        modEventBus.register(new ModEventHandler());
+
+        // 注册 Forge 事件总线处理器
+        MinecraftForge.EVENT_BUS.register(new ForgeEventHandler());
 
         // 注册网络信道
         DialogNetworkHandler.register();
@@ -110,32 +114,38 @@ public class Main {
         LOGGER.info("Universal Mod of Infinite Flame Team初始化完成");
     }
 
-    @SubscribeEvent
-    public void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS ||
-                event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS ||
-                event.getTabKey() == CreativeModeTabs.REDSTONE_BLOCKS) {
-            for (RegistryObject<Item> item : COLORED_LAMP_ITEMS.values()) {
-                event.accept(item.get());
+    // 专门处理 Mod 事件总线的类
+    private static class ModEventHandler {
+        @SubscribeEvent
+        public void addCreative(BuildCreativeModeTabContentsEvent event) {
+            if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS ||
+                    event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS ||
+                    event.getTabKey() == CreativeModeTabs.REDSTONE_BLOCKS) {
+                for (RegistryObject<Item> item : COLORED_LAMP_ITEMS.values()) {
+                    event.accept(item.get());
+                }
             }
         }
     }
 
-    @SubscribeEvent
-    public void onRegisterCommands(RegisterCommandsEvent event) {
-        DialogCommand.register(event.getDispatcher());
-        LOGGER.info("UMOIFT对话框命令注册完成");
-    }
+    // 专门处理 Forge 事件总线的类
+    private static class ForgeEventHandler {
+        @SubscribeEvent
+        public void onRegisterCommands(RegisterCommandsEvent event) {
+            DialogCommand.register(event.getDispatcher());
+            LOGGER.info("UMOIFT对话框命令注册完成");
+        }
 
-    @SubscribeEvent
-    public void onAddReloadListener(AddReloadListenerEvent event) {
-        event.addListener(new DialogReloadListener());
-    }
+        @SubscribeEvent
+        public void onAddReloadListener(AddReloadListenerEvent event) {
+            event.addListener(new DialogReloadListener());
+        }
 
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
-        // 服务器启动时初始化对话框系统
-        DialogManager.loadDialogs(event.getServer().getResourceManager());
+        @SubscribeEvent
+        public void onServerStarting(ServerStartingEvent event) {
+            // 服务器启动时初始化对话框系统
+            OfficialDialogManager.loadDialogs(event.getServer().getResourceManager());
+        }
     }
 
     // 修复后的 DialogReloadListener
@@ -150,7 +160,7 @@ public class Main {
             return CompletableFuture.runAsync(() -> {
                 // 在后台线程中重新加载对话框
                 try {
-                    DialogManager.loadDialogs(resourceManager);
+                    OfficialDialogManager.loadDialogs(resourceManager);
                     LOGGER.info("对话框配置重载完成");
                 } catch (Exception e) {
                     LOGGER.error("重载对话框配置时发生错误", e);

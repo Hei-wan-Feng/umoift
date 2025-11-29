@@ -131,5 +131,14 @@
 .waiting)
 
 (
+做一下彩色烈焰弹，可以发射，也可以直接在地上点着，当然点出来的是和染色的烈焰弹一样颜色的火，彩色烈焰弹合成表：使用普通烈焰弹和颜料合成，去除彩色烈焰弹的彩色：使用一把斧子和染色的烈焰弹放在那，然后会合成出普通的烈焰弹，斧子会掉一点耐久，但是不会消失
+把网络等其他高技术的做进游戏里
+.waiting)
+
+(
+把类似于KubeJS的东西做进来，但是是用java，写好的源文件\(.java\)放在versions/版本名/umoiftCustomPlugins，然后在单人游戏里添加一个按钮，是启用或关闭umoift自定义插件，只有在选择世界后会亮起，启用或关闭的umoift自定义插件对选择的世界影响，还有versions/版本名/umoiftCustomPlugins只用放.java，其他的就不用放了
+.waiting)
+
+(
 其他等待写入中…
 .preparing.doing.unknown.comment)

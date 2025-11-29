@@ -1,7 +1,55 @@
+//package com.infiniteflameteam.umoift.client;
+//
+//import com.google.gson.Gson;
+//import com.google.gson.GsonBuilder;
+//import com.google.gson.JsonObject;
+//import com.infiniteflameteam.umoift.client.gui.OfficialDialogScreen;
+//import com.infiniteflameteam.umoift.network.DialogNetworkHandler;
+//import net.minecraft.client.Minecraft;
+//import net.minecraftforge.api.distmarker.Dist;
+//import net.minecraftforge.api.distmarker.OnlyIn;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+//
+//@OnlyIn(Dist.CLIENT)
+//public class ClientDialogHandler {
+//    private static final Logger LOGGER = LoggerFactory.getLogger(ClientDialogHandler.class);
+//    private static final Gson GSON = new GsonBuilder().create();
+//
+//    public static void handleOfficialDialogOpen(String dialogId, String dialogData) {
+//        Minecraft minecraft = Minecraft.getInstance();
+//
+//        try {
+//            LOGGER.info("收到对话框打开请求: {}", dialogId);
+//
+//            // 解析对话框数据
+//            JsonObject dialog = GSON.fromJson(dialogData, JsonObject.class);
+//
+//            // 在客户端线程中显示对话框
+//            minecraft.execute(() -> {
+//                LOGGER.info("创建对话框界面");
+//                minecraft.setScreen(new OfficialDialogScreen(dialogId, dialog));
+//            });
+//        } catch (Exception e) {
+//            LOGGER.error("处理对话框打开失败", e);
+//        }
+//    }
+//
+//    public static void sendOfficialDialogAction(String dialogId, String actionType, JsonObject actionData) {
+//        LOGGER.info("发送对话框动作: {} - {} - {}", dialogId, actionType, actionData);
+//        DialogNetworkHandler.ServerboundOfficialDialogActionPacket packet =
+//                new DialogNetworkHandler.ServerboundOfficialDialogActionPacket(dialogId, actionType, actionData);
+//        DialogNetworkHandler.INSTANCE.sendToServer(packet);
+//    }
+//}
+// 以上是旧版代码
+
 package com.infiniteflameteam.umoift.client;
 
 import com.google.gson.Gson;
-import com.infiniteflameteam.umoift.client.gui.DialogScreen;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.infiniteflameteam.umoift.client.gui.OfficialDialogScreen;
 import com.infiniteflameteam.umoift.network.DialogNetworkHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
@@ -12,52 +60,42 @@ import org.slf4j.LoggerFactory;
 @OnlyIn(Dist.CLIENT)
 public class ClientDialogHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientDialogHandler.class);
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().create();
 
-    public static void handleDialogOpen(String dialogId, String sceneData) {
+    public static void handleOfficialDialogOpen(String dialogId, String dialogData) {
         Minecraft minecraft = Minecraft.getInstance();
 
         try {
-            // 解析场景数据
-            DialogSceneData scene = GSON.fromJson(sceneData, DialogSceneData.class);
+            LOGGER.info("收到对话框打开请求: {}", dialogId);
+
+            // 解析对话框数据
+            JsonObject dialog = GSON.fromJson(dialogData, JsonObject.class);
 
             // 在客户端线程中显示对话框
             minecraft.execute(() -> {
-                minecraft.setScreen(new DialogScreen(dialogId, scene));
+                LOGGER.info("创建对话框界面");
+                minecraft.setScreen(new OfficialDialogScreen(dialogId, dialog));
             });
         } catch (Exception e) {
             LOGGER.error("处理对话框打开失败", e);
         }
     }
 
-    public static void handleDialogClear() {
-        Minecraft minecraft = Minecraft.getInstance();
-        minecraft.execute(() -> {
-            if (minecraft.screen instanceof DialogScreen) {
-                minecraft.setScreen(null);
-            }
-        });
-    }
-
-    public static void sendButtonClick(String dialogId, String buttonAction) {
-        DialogNetworkHandler.ServerboundDialogButtonPacket packet =
-                new DialogNetworkHandler.ServerboundDialogButtonPacket(dialogId, buttonAction);
+    public static void sendOfficialDialogAction(String dialogId, String actionType, JsonObject actionData) {
+        LOGGER.info("发送对话框动作: {} - {} - {}", dialogId, actionType, actionData);
+        DialogNetworkHandler.ServerboundOfficialDialogActionPacket packet =
+                new DialogNetworkHandler.ServerboundOfficialDialogActionPacket(dialogId, actionType, actionData);
         DialogNetworkHandler.INSTANCE.sendToServer(packet);
     }
 
-    // 客户端场景数据结构
-    public static class DialogSceneData {
-        public String title;
-        public String[] body;
-        public DialogButtonData[] buttons;
-        public boolean pauseGame;
-        public boolean canCloseWithEscape;
-        public String background;
-    }
-
-    public static class DialogButtonData {
-        public String text;
-        public String action;
-        public String style;
+    public static void handleClearDialog() {
+        Minecraft minecraft = Minecraft.getInstance();
+        minecraft.execute(() -> {
+            // 如果当前屏幕是对话框，则关闭它
+            if (minecraft.screen instanceof OfficialDialogScreen) {
+                minecraft.setScreen(null);
+                LOGGER.info("已清除对话框");
+            }
+        });
     }
 }
