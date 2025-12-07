@@ -6,7 +6,7 @@
 
 Infinite Flame Team里包含的人：
 
-DeepSeek AI(开发, 写代码), Hei_wan_Feng(开发, 写代码, 调试, 管理资源(src/main/resources), 其他)
+DeepSeek AI(开发, 写代码), Hei_wan_Feng(开发, 写代码, 调试, 管理资源(src/main/resources), 其他), Ean游戏(目前暂时分配美术任务，将来会邀请成为贡献者)
 
 警告：
 
